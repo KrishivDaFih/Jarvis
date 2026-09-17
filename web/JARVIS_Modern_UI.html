@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS // AI Command Interface</title>
+<style>
+:root{
+  --bg:#02070a; --panel:rgba(5,16,21,.72); --line:rgba(56,205,255,.30);
+  --cyan:#36d9ff; --cyan2:#8af0ff; --text:#e8faff; --muted:#82a8b5;
+  --green:#45f3b0; --amber:#ffc25b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+font-family:Inter,Segoe UI,Arial,sans-serif}
+body:before{content:"";position:fixed;inset:0;background:
+radial-gradient(circle at 52% 48%,rgba(0,180,255,.09),transparent 28%),
+linear-gradient(rgba(54,217,255,.025) 1px,transparent 1px),
+linear-gradient(90deg,rgba(54,217,255,.025) 1px,transparent 1px);
+background-size:auto,40px 40px,40px 40px;pointer-events:none}
+.app{height:100%;display:grid;grid-template-columns:210px 1fr;grid-template-rows:62px 1fr 58px}
+header{grid-column:1/-1;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 24px;gap:14px;background:rgba(1,8,11,.78);backdrop-filter:blur(18px)}
+.logo{display:flex;align-items:center;gap:12px;font-size:19px;letter-spacing:4px}
+.logo-mark{width:25px;height:25px;border:1px solid var(--cyan);border-radius:50%;position:relative;box-shadow:0 0 18px rgba(54,217,255,.4)}
+.logo-mark:after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.wave{margin-left:8px;color:var(--cyan);letter-spacing:2px;font-size:13px}
+.header-center{margin:auto;width:130px;height:24px;border:1px solid rgba(54,217,255,.12);border-radius:20px;text-align:center;color:var(--muted);font-size:11px;line-height:22px;letter-spacing:3px}
+.win{display:flex;gap:20px;color:var(--cyan);font-size:18px}
+aside{border-right:1px solid var(--line);padding:20px 12px;display:flex;flex-direction:column;background:rgba(2,10,13,.65)}
+.nav{display:flex;flex-direction:column;gap:5px}
+.nav button{border:0;background:transparent;color:#9ab9c3;text-align:left;padding:12px 14px;border-radius:10px;font-size:15px;cursor:pointer;transition:.2s}
+.nav button:hover,.nav button.active{color:white;background:linear-gradient(90deg,rgba(54,217,255,.16),transparent);box-shadow:inset 2px 0 var(--cyan)}
+.icon{display:inline-block;width:28px;color:var(--cyan);font-size:16px}
+.net{margin-top:auto;border-top:1px solid rgba(54,217,255,.12);padding:16px 10px;color:var(--muted);font-size:11px;letter-spacing:1px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:8px}
+main{padding:28px 34px 22px;display:grid;grid-template-columns:285px minmax(390px,1fr) 300px;gap:25px;min-width:0}
+.left,.right{display:flex;flex-direction:column;gap:18px}
+h1{font-size:29px;font-weight:400;margin:0 0 5px}
+.sub{color:var(--cyan);font-size:15px}
+.panel{background:linear-gradient(145deg,rgba(7,22,28,.78),rgba(2,10,14,.52));border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:inset 0 0 30px rgba(54,217,255,.015),0 12px 40px rgba(0,0,0,.18)}
+.panel-title{font-size:12px;letter-spacing:1.4px;color:#cbe9f0;display:flex;justify-content:space-between;margin-bottom:17px}
+.metric{margin:14px 0}.metric-row{display:flex;justify-content:space-between;font-size:12px;color:#a5c2cb;margin-bottom:7px}
+.bar{height:4px;background:#10262d;border-radius:9px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));box-shadow:0 0 9px var(--cyan);border-radius:9px}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.action{height:82px;background:rgba(2,14,19,.65);border:1px solid rgba(54,217,255,.18);border-radius:11px;color:#bde1e9;cursor:pointer}.action:hover{border-color:var(--cyan);transform:translateY(-2px)}.action b{display:block;color:var(--cyan);font-size:21px;margin-bottom:7px}.action span{font-size:10px}
+.center{display:flex;flex-direction:column;min-width:0}
+.status{text-align:center;margin-top:10px}.online{display:inline-flex;align-items:center;border:1px solid rgba(69,243,176,.28);border-radius:20px;padding:7px 14px;color:#dffcf1;font-size:11px;letter-spacing:1px}
+.core-wrap{flex:1;min-height:360px;display:flex;align-items:center;justify-content:center;position:relative}
+.core{width:310px;height:310px;position:relative;display:grid;place-items:center}
+.core:before,.core:after{content:"";position:absolute;border:1px solid rgba(54,217,255,.28);border-radius:50%;inset:16px;animation:spin 14s linear infinite}
+.core:after{inset:42px;border-style:dashed;animation:spin 9s linear reverse infinite}
+.ring{position:absolute;border:1px solid rgba(54,217,255,.22);border-radius:50%}.r1{inset:0;animation:spin 18s linear infinite}.r2{inset:30px;border-color:rgba(69,243,176,.24);animation:spin 12s linear reverse infinite}.r3{inset:67px;border-color:rgba(138,240,255,.42);animation:pulse 2.5s ease-in-out infinite}
+.hex{width:112px;height:112px;clip-path:polygon(25% 3%,75% 3%,97% 25%,97% 75%,75% 97%,25% 97%,3% 75%,3% 25%);background:linear-gradient(135deg,rgba(54,217,255,.25),rgba(54,217,255,.04));border:1px solid var(--cyan);display:grid;place-items:center;position:relative;box-shadow:0 0 45px rgba(54,217,255,.3)}
+.hex:before{content:"";width:65px;height:65px;clip-path:inherit;background:radial-gradient(circle,#fff 0 7%,#48dcff 10%,rgba(54,217,255,.2) 48%,transparent 70%);animation:pulse 1.8s infinite}
+.node{position:absolute;width:5px;height:5px;background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan)}
+.n1{top:17px;left:50%}.n2{right:27px;top:36%}.n3{bottom:23px;left:31%}.n4{left:24px;top:45%}
+.core-label{position:absolute;bottom:-34px;text-align:center;color:#91c9d5;font-size:10px;letter-spacing:3px}
+.command{height:60px;border:1px solid var(--cyan);border-radius:32px;background:rgba(2,16,21,.75);display:flex;align-items:center;padding:0 20px;box-shadow:0 0 28px rgba(54,217,255,.08)}
+.command input{flex:1;background:none;border:0;outline:0;color:white;font-size:14px}.command input::placeholder{color:#7696a0}.mic{color:var(--cyan);font-size:23px;cursor:pointer}
+.item{padding:12px 0;border-bottom:1px solid rgba(54,217,255,.1);font-size:12px}.item:last-child{border:0}.item small{display:block;color:#668994;margin-top:4px}.time{color:#bceaf3}.tag{float:right;color:var(--cyan);font-size:10px}
+.connect{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.conn{height:61px;border:1px solid rgba(54,217,255,.14);border-radius:10px;background:#041117;text-align:center;padding-top:9px;color:#b9d8df;font-size:9px}.conn b{display:block;font-size:18px;color:var(--cyan);margin-bottom:5px}
+footer{grid-column:1/-1;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;color:var(--muted);font-size:11px;letter-spacing:1px;background:rgba(1,8,11,.78)}
+.footer-core{width:44px;height:44px;border:1px solid var(--cyan);border-radius:50%;display:grid;place-items:center;box-shadow:0 0 18px rgba(54,217,255,.15)}.footer-core i{width:10px;height:10px;background:var(--cyan);border-radius:50%;box-shadow:0 0 12px var(--cyan)}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{0%,100%{transform:scale(.96);opacity:.75}50%{transform:scale(1.04);opacity:1}}
+@media(max-width:1000px){main{grid-template-columns:220px 1fr}.right{display:none}}@media(max-width:700px){.app{grid-template-columns:1fr;grid-template-rows:60px auto 1fr 50px}aside{display:none}main{grid-template-columns:1fr;padding:18px}.left{display:none}.core{width:260px;height:260px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo"><span class="logo-mark"></span>JARVIS</div>
+  <div class="wave">⌁│⌁│⌁│⌁</div>
+  <div class="header-center">AI CORE • ONLINE</div>
+  <div class="win">− □ ×</div>
+</header>
+
+<aside>
+  <nav class="nav">
+    <button class="active"><span class="icon">⌂</span>Home</button>
+    <button><span class="icon">◌</span>Chat</button>
+    <button><span class="icon">▣</span>Memory</button>
+    <button><span class="icon">✓</span>Tasks</button>
+    <button><span class="icon">⚙</span>System</button>
+    <button><span class="icon">□</span>Files</button>
+    <button><span class="icon">▦</span>Apps</button>
+    <button><span class="icon">◎</span>Web</button>
+    <button><span class="icon">⚙</span>Settings</button>
+  </nav>
+  <div class="net"><span class="dot"></span>NETWORK<br><span style="color:var(--green);margin-left:16px">CONNECTED</span></div>
+</aside>
+
+<main>
+<section class="left">
+  <div><h1>Good afternoon.</h1><div class="sub">How can I help you today?</div></div>
+  <div class="panel">
+    <div class="panel-title">SYSTEM STATUS <span>100%</span></div>
+    <div class="metric"><div class="metric-row"><span>CPU</span><span>28%</span></div><div class="bar"><div class="fill" style="width:28%"></div></div></div>
+    <div class="metric"><div class="metric-row"><span>RAM</span><span>46%</span></div><div class="bar"><div class="fill" style="width:46%"></div></div></div>
+    <div class="metric"><div class="metric-row"><span>DISK</span><span>62%</span></div><div class="bar"><div class="fill" style="width:62%"></div></div></div>
+    <div class="metric"><div class="metric-row"><span>NETWORK</span><span>32%</span></div><div class="bar"><div class="fill" style="width:32%"></div></div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">⚡ QUICK ACTIONS</div>
+    <div class="actions">
+      <button class="action" onclick="say('Screenshot ready')"><b>▣</b><span>Screenshot</span></button>
+      <button class="action" onclick="say('Listening')"><b>⌁</b><span>Speak</span></button>
+      <button class="action" onclick="focusCmd()"><b>⌕</b><span>Search</span></button>
+      <button class="action" onclick="say('Note mode activated')"><b>▤</b><span>Note</span></button>
+      <button class="action" onclick="say('Calendar opened')"><b>□</b><span>Calendar</span></button>
+      <button class="action" onclick="say('Calculator ready')"><b>▦</b><span>Calculator</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="center">
+  <div class="status"><span class="online"><span class="dot"></span>JARVIS ONLINE</span></div>
+  <div class="core-wrap">
+    <div class="core">
+      <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="node n1"></div><div class="node n2"></div><div class="node n3"></div><div class="node n4"></div>
+      <div class="hex"></div><div class="core-label">NEURAL CORE // ACTIVE</div>
+    </div>
+  </div>
+  <div class="command"><input id="cmd" placeholder="Ask JARVIS anything..." onkeydown="if(event.key==='Enter')runCommand()"><span class="mic" onclick="runCommand()">♩</span></div>
+</section>
+
+<section class="right">
+  <div class="panel">
+    <div class="panel-title">▣ UPCOMING <span style="color:var(--cyan)">VIEW ALL</span></div>
+    <div class="item"><span class="time">03:00 PM</span><span class="tag">TODAY</span><br>Physics Project</div>
+    <div class="item"><span class="time">05:30 PM</span><span class="tag">TODAY</span><br>Study Session</div>
+    <div class="item"><span class="time">08:00 PM</span><span class="tag" style="color:var(--amber)">TODAY</span><br>Personal Time</div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">♧ NOTIFICATIONS <span style="color:var(--cyan)">CLEAR ALL</span></div>
+    <div class="item">◈ System ready <small>All core services running</small></div>
+    <div class="item">◉ Neural core active <small>Awaiting command</small></div>
+    <div class="item">◇ Sync complete <small>Connectors are up to date</small></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">◈ CONNECTORS <span style="color:var(--cyan)">MANAGE</span></div>
+    <div class="connect">
+      <div class="conn"><b>◎</b>OpenAI</div><div class="conn"><b>G</b>Google</div><div class="conn"><b>▶</b>YouTube</div><div class="conn"><b>W</b>Wiki</div>
+      <div class="conn"><b>✉</b>Gmail</div><div class="conn"><b>◆</b>Drive</div><div class="conn"><b>□</b>Calendar</div><div class="conn"><b>+</b>Add</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span id="clock">--:--:--</span><div class="footer-core"><i></i></div><span>JARVIS OS // v2.0.0</span>
+</footer>
+</div>
+<script>
+function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString([], {hour12:false})}
+setInterval(updateClock,1000);updateClock();
+function focusCmd(){document.getElementById('cmd').focus()}
+function say(text){document.getElementById('cmd').value=text;document.getElementById('cmd').focus()}
+function runCommand(){
+ const input=document.getElementById('cmd'); const value=input.value.trim();
+ if(!value)return;
+ input.value='Processing: '+value;
+ setTimeout(()=>{input.value='Command received — connect your AI backend to execute it.'},700);
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')});
+</script>
+</body>
+</html>
