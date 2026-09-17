@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self';" />
+<title>Jarvis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="titlebar">
+  <span class="tb-name">Jarvis</span>
+  <div class="tb-actions">
+    <button class="tb-btn" id="tbMin" title="Minimise">&#8211;</button>
+    <button class="tb-btn close" id="tbClose" title="Close">&#10005;</button>
+  </div>
+</div>
+
+<div class="hud">
+  <span class="bracket tl"></span><span class="bracket tr"></span>
+  <span class="bracket bl"></span><span class="bracket br"></span>
+
+  <header class="masthead">
+    <div>
+      <h1 class="wordmark">J.A.R.V.I.S.</h1>
+      <p class="tagline">Just a rather very intelligent system</p>
+    </div>
+    <div class="readout">
+      <span class="link" id="linkChip"><i></i><span id="linkText">Link stable</span></span>
+      <div>
+        <span class="clock" id="clock">00:00:00</span>
+        <span class="date" id="date">—</span>
+      </div>
+      <button class="cog" id="cog" title="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section class="col left">
+      <div class="module">
+        <header>System</header>
+        <div class="gauge">
+          <div class="gauge-top"><span class="gauge-name">Processor</span><span class="gauge-val" id="v-cpu">34%</span></div>
+          <div class="track"><i id="b-cpu" style="width:34%"></i></div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-top"><span class="gauge-name">Memory</span><span class="gauge-val" id="v-mem">62%</span></div>
+          <div class="track"><i id="b-mem" style="width:62%"></i></div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-top"><span class="gauge-name">Reactor output</span><span class="gauge-val" id="v-pwr">88%</span></div>
+          <div class="track warn"><i id="b-pwr" style="width:88%"></i></div>
+        </div>
+      </div>
+
+      <div class="module">
+        <header>Subsystems</header>
+        <div class="arcs" id="arcs"></div>
+      </div>
+    </section>
+
+    <section class="col orb-col">
+      <div class="orb-wrap" id="orbWrap">
+        <svg class="reticle" viewBox="0 0 400 400" aria-hidden="true">
+          <g class="spin-c">
+            <circle cx="200" cy="200" r="196" fill="none" stroke="rgba(95,216,255,0.12)" stroke-width="1"/>
+            <g id="ticks"></g>
+          </g>
+          <g class="spin-a">
+            <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(95,216,255,0.3)" stroke-width="1"
+                    stroke-dasharray="120 26 58 26"/>
+            <circle cx="200" cy="30" r="3" fill="#5fd8ff"/>
+          </g>
+          <g class="spin-b">
+            <circle cx="200" cy="200" r="146" fill="none" stroke="rgba(255,196,107,0.28)" stroke-width="1"
+                    stroke-dasharray="5 13"/>
+            <path d="M200 66 l-9 -13 h18 z" fill="rgba(255,196,107,0.7)"/>
+          </g>
+        </svg>
+
+        <!-- Mark 85 arc reactor -->
+        <div class="reactor">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0"    stop-color="#5d7884"/>
+                <stop offset="0.35" stop-color="#2b3d46"/>
+                <stop offset="0.7"  stop-color="#16242c"/>
+                <stop offset="1"    stop-color="#3b535d"/>
+              </linearGradient>
+              <radialGradient id="coreGlow">
+                <stop offset="0"    stop-color="#ffffff" stop-opacity="0.85"/>
+                <stop offset="0.45" stop-color="#8fe9ff" stop-opacity="0.35"/>
+                <stop offset="1"    stop-color="#8fe9ff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+
+            <g class="plates">
+              <circle class="plate-ring" cx="100" cy="100" r="80" fill="none" stroke-width="26" stroke-dasharray="53 7"/>
+            </g>
+            <circle class="bezel" cx="100" cy="100" r="93"/>
+            <circle class="bezel" cx="100" cy="100" r="67" style="stroke:#63838f"/>
+            <circle class="well" cx="100" cy="100" r="64"/>
+            <circle class="core-halo" cx="100" cy="103" r="60"/>
+
+            <g class="vent">
+              <line x1="100" y1="40"  x2="100" y2="50"/>
+              <line x1="48"  y1="130" x2="39"  y2="135"/>
+              <line x1="152" y1="130" x2="161" y2="135"/>
+            </g>
+
+            <polygon class="tri-halo" points="100,55 145,132 55,132"/>
+            <polygon class="tri-edge" points="100,55 145,132 55,132"/>
+            <polygon class="tri-in"   points="100,77 126,122 74,122"/>
+
+            <circle class="core-halo" cx="100" cy="108" r="26"/>
+            <circle class="core" cx="100" cy="108" r="9"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="orb-status">
+        <p class="state" id="state">Standby</p>
+        <p class="hint" id="hint">Type a command below</p>
+      </div>
+    </section>
+
+    <section class="col right">
+      <div class="module" style="flex:1;min-height:0;">
+        <header>Transcript</header>
+        <div class="feed" id="feed"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="command">
+    <button class="mic" id="mic" aria-label="Toggle dictation" aria-pressed="false">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/>
+        <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+      </svg>
+    </button>
+    <span class="caret">&gt;</span>
+    <input id="cmd" type="text" placeholder="Type a command" autocomplete="off" />
+    <button class="send" id="send">Send</button>
+  </footer>
+</div>
+
+<!-- settings -->
+<div class="sheet" id="sheet">
+  <div class="sheet-card">
+    <h2>Settings</h2>
+    <p class="sub">Keys are stored locally in your Windows user profile</p>
+
+    <div class="field">
+      <label for="provider">Provider</label>
+      <select id="provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI</option>
+        <option value="groq">Groq</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="apiKey">API key</label>
+      <input id="apiKey" type="password" placeholder="Paste the key for the selected provider" />
+      <small>Each provider keeps its own key. Switching providers swaps the field.</small>
+    </div>
+
+    <div class="field">
+      <label for="model">Model</label>
+      <input id="model" type="text" placeholder="model name" />
+      <small>Change this if the default model name is retired.</small>
+    </div>
+
+    <div class="field">
+      <label for="shortcut">Global shortcut</label>
+      <input id="shortcut" type="text" placeholder="Control+Shift+J" />
+      <small>Shows or hides Jarvis from anywhere in Windows.</small>
+    </div>
+
+    <div class="field">
+      <label for="sysPrompt">Personality</label>
+      <textarea id="sysPrompt"></textarea>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn" id="sheetCancel">Cancel</button>
+      <button class="btn primary" id="sheetSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
