@@ -29,7 +29,7 @@ npm run dist
 electron-builder writes the installer to:
 
 ```
-dist\Jarvis-Setup-2.1.0.exe
+dist\Jarvis-Setup-2.2.0.exe
 ```
 
 That is a proper NSIS installer:
@@ -123,6 +123,13 @@ tooling from your earlier Kairos build is not in here.
 ---
 
 ## 7. Changelog
+
+**2.2.0**
+* Removed the System and Subsystems panels. They showed randomised numbers, not
+  real machine stats, so they were decoration pretending to be instrumentation.
+* Layout is now two columns — reactor and transcript — and the reactor is larger
+  in both windowed and fullscreen modes.
+* Deleted the dead gauge/arc CSS and the timer that drove the fake readings.
 
 **2.1.0**
 * Fullscreen support: `F11` anywhere (works while typing), a titlebar button,

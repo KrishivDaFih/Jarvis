@@ -94,42 +94,6 @@
     ticks.appendChild(l);
   }
 
-  /* ── subsystem arc gauges ── */
-  var subsystems = [
-    { name: 'Net',   pct: 0.94, color: '#5fd8ff' },
-    { name: 'Audio', pct: 0.68, color: '#5fd8ff' },
-    { name: 'Core',  pct: 0.88, color: '#ffc46b' }
-  ];
-  var arcs = document.getElementById('arcs');
-  subsystems.forEach(function (s) {
-    var R = 22, C = 2 * Math.PI * R;
-    var unit = document.createElement('div');
-    unit.className = 'arc-unit';
-    unit.innerHTML =
-      '<svg width="56" height="56" viewBox="0 0 56 56">' +
-        '<circle cx="28" cy="28" r="' + R + '" fill="none" stroke="rgba(95,216,255,0.12)" stroke-width="3"/>' +
-        '<circle cx="28" cy="28" r="' + R + '" fill="none" stroke="' + s.color + '" stroke-width="3" stroke-linecap="round" ' +
-          'stroke-dasharray="' + (C * s.pct).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 28 28)"/>' +
-        '<text x="28" y="32" text-anchor="middle" fill="#cfeaf5" font-family="JetBrains Mono, monospace" font-size="11">' +
-          Math.round(s.pct * 100) + '</text>' +
-      '</svg><b>' + s.name + '</b>';
-    arcs.appendChild(unit);
-  });
-
-  /* ── drifting telemetry (cosmetic) ── */
-  var gauges = [
-    { v: 'v-cpu', b: 'b-cpu', base: 34, range: 22, suffix: '%' },
-    { v: 'v-mem', b: 'b-mem', base: 62, range: 9,  suffix: '%' },
-    { v: 'v-pwr', b: 'b-pwr', base: 88, range: 6,  suffix: '%' }
-  ];
-  setInterval(function () {
-    gauges.forEach(function (g) {
-      var val = Math.round(g.base + (Math.random() - 0.5) * g.range);
-      document.getElementById(g.v).textContent = val + g.suffix;
-      document.getElementById(g.b).style.width = Math.min(100, val) + '%';
-    });
-  }, 2200);
-
   /* ── reactor state ── */
   var HINTS = {
     standby:    'Type a command below',
