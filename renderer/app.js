@@ -14,9 +14,58 @@
   var history  = [];          // [{ role, content }] sent to the model
   var busy     = false;
 
+  var MAX_TURNS = 20;         // keep the context (and the bill) bounded
+
+  /* If index.html is opened directly in a browser there is no preload bridge.
+     Stub it so the HUD still renders and says what is wrong, instead of
+     throwing on the first call and leaving a dead-looking window. */
+  var bridge = window.jarvis || {
+    send:         function () { return Promise.resolve({ ok: false, error: 'Not running inside Electron — start the app with "npm start".' }); },
+    getSettings:  function () { return Promise.resolve({ provider: 'anthropic', apiKeys: {}, models: {}, shortcut: '', systemPrompt: '' }); },
+    saveSettings: function (s) { return Promise.resolve(s); },
+    minimize:     function () {},
+    toggleMax:    function () {},
+    close:        function () {},
+    toggleFullscreen: function () {
+      // outside Electron, fall back to the browser fullscreen API
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    },
+    exitFullscreen: function () { if (document.fullscreenElement) document.exitFullscreen(); },
+    isFullscreen:   function () { return Promise.resolve(!!document.fullscreenElement); },
+    onFullscreen:   function () {},
+    onMaximized:    function () {}
+  };
+
   /* ── window controls ── */
-  document.getElementById('tbMin').addEventListener('click', function () { window.jarvis.minimize(); });
-  document.getElementById('tbClose').addEventListener('click', function () { window.jarvis.close(); });
+  document.getElementById('tbMin').addEventListener('click', function () { bridge.minimize(); });
+  document.getElementById('tbClose').addEventListener('click', function () { bridge.close(); });
+  document.getElementById('tbMax').addEventListener('click', function () { bridge.toggleMax(); });
+  document.getElementById('tbFull').addEventListener('click', function () { bridge.toggleFullscreen(); });
+  document.getElementById('fsExit').addEventListener('click', function () { bridge.exitFullscreen(); });
+
+  // double-clicking the bar maximises, the way a normal Windows titlebar does
+  document.querySelector('.titlebar').addEventListener('dblclick', function (e) {
+    if (e.target.closest('.tb-actions')) return;
+    bridge.toggleMax();
+  });
+
+  /* Fullscreen: main sends the state, and we mirror it on <body> so the
+     titlebar hides and the layout opens up. F11 is also handled in main so it
+     fires even while typing; this listener covers the browser fallback. */
+  function setFullscreen(on) {
+    document.body.classList.toggle('fullscreen', !!on);
+    var btn = document.getElementById('tbFull');
+    if (btn) btn.title = on ? 'Exit fullscreen (F11)' : 'Fullscreen (F11)';
+  }
+  bridge.onFullscreen(setFullscreen);
+  document.addEventListener('fullscreenchange', function () {
+    if (!window.jarvis) setFullscreen(!!document.fullscreenElement);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'F11') { e.preventDefault(); bridge.toggleFullscreen(); }
+  });
+  bridge.isFullscreen().then(setFullscreen);
 
   /* ── clock ── */
   function tick() {
@@ -107,6 +156,12 @@
     feed.scrollTop = feed.scrollHeight;
   }
 
+  /* Send only the recent turns. Unbounded history meant every message
+     re-sent the whole conversation, so cost and latency climbed all session. */
+  function trimmed() {
+    return history.slice(-MAX_TURNS);
+  }
+
   /* ── send ── */
   function submit() {
     var text = cmd.value.trim();
@@ -119,7 +174,7 @@
     history.push({ role: 'user', content: text });
     setState('processing');
 
-    window.jarvis.send(history).then(function (res) {
+    bridge.send(trimmed()).then(function (res) {
       if (res.ok) {
         history.push({ role: 'assistant', content: res.text });
         setState('speaking');
@@ -228,7 +283,7 @@
     settings.shortcut     = shortcutIn.value.trim();
     settings.systemPrompt = sysIn.value;
 
-    window.jarvis.saveSettings(settings).then(function (saved) {
+    bridge.saveSettings(settings).then(function (saved) {
       settings = saved;
       updateLinkChip();
       closeSheet();
@@ -236,8 +291,11 @@
   });
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && sheet.classList.contains('open')) {
-      refreshSettings().then(closeSheet);
+    if (e.key !== 'Escape') return;
+    if (sheet.classList.contains('open')) {
+      refreshSettings().then(closeSheet);       // sheet takes priority
+    } else if (document.body.classList.contains('fullscreen')) {
+      bridge.exitFullscreen();
     }
   });
 
@@ -251,7 +309,7 @@
   }
 
   function refreshSettings() {
-    return window.jarvis.getSettings().then(function (s) { settings = s; return s; });
+    return bridge.getSettings().then(function (s) { settings = s; return s; });
   }
 
   /* ── boot ── */

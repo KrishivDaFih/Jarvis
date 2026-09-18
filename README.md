@@ -29,7 +29,7 @@ npm run dist
 electron-builder writes the installer to:
 
 ```
-dist\Jarvis-Setup-2.0.0.exe
+dist\Jarvis-Setup-2.1.0.exe
 ```
 
 That is a proper NSIS installer:
@@ -76,6 +76,9 @@ your keys. Delete that folder by hand if you want a clean slate.
 | Settings | cog icon, top right |
 | Close settings without saving | `Esc` |
 | Move the window | drag the top bar |
+| Fullscreen | `F11`, or the corners icon in the top bar |
+| Leave fullscreen | `F11`, `Esc`, or the button that appears top right |
+| Maximise / restore | the square icon, or double-click the top bar |
 
 ---
 
@@ -119,7 +122,34 @@ tooling from your earlier Kairos build is not in here.
 
 ---
 
-## 7. Coming from Kairos
+## 7. Changelog
+
+**2.1.0**
+* Fullscreen support: `F11` anywhere (works while typing), a titlebar button,
+  and `Esc` to leave. The titlebar hides in fullscreen and a faint exit button
+  appears top right.
+* In fullscreen the layout opens up — larger reactor, wider transcript, more
+  padding — rather than just stretching the windowed layout.
+* Added a proper maximise/restore button next to minimise.
+* `Esc` closes the settings sheet first and only exits fullscreen when no
+  sheet is open.
+
+**2.0.1**
+* Fixed the layout bug that pushed the command bar and bottom brackets off-screen
+  (the titlebar and the HUD were each claiming full window height).
+* Reactor triangle inverted — apex down, with the vents, glow, and core moved to match.
+* App icon redrawn to match.
+* Provider dropdown options forced dark; they rendered white-on-white on Windows.
+* Reticle clipped to its own column so it can't overlap the side panels when the
+  window is narrow.
+* Conversation history now trims to the last 20 turns instead of growing forever.
+* Blank Model field falls back to the default instead of failing with an opaque 400.
+* Opening `index.html` outside Electron no longer throws — it says what's wrong.
+* Double-click the titlebar to maximise.
+
+---
+
+## 8. Coming from Kairos
 
 This is a fresh project, not a patch on your old Kairos source. If you want the
 UI dropped into the existing Kairos codebase instead, the pieces to copy are

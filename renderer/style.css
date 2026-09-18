@@ -22,6 +22,10 @@ html,body{
   user-select:none;
 }
 
+/* the titlebar and the HUD split the viewport between them;
+   without this the HUD's own height pushed the command bar off-screen */
+body{display:flex;flex-direction:column;}
+
 ::selection{background:rgba(95,216,255,.25);}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -50,10 +54,31 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 }
 .tb-btn:hover{background:rgba(95,216,255,.1);color:var(--cyan);}
 .tb-btn.close:hover{background:rgba(255,80,80,.22);color:#ffdede;}
+.tb-btn svg{display:block;}
+
+/* ─────────── fullscreen ─────────── */
+body.fullscreen .titlebar{display:none;}
+
+.fs-exit{
+  position:fixed;top:10px;right:12px;z-index:40;display:none;
+  width:34px;height:34px;align-items:center;justify-content:center;
+  border:1px solid var(--line);background:rgba(6,17,25,.75);color:var(--dim);
+  cursor:pointer;opacity:.25;transition:opacity .2s, color .2s, box-shadow .2s;
+}
+body.fullscreen .fs-exit{display:flex;}
+.fs-exit:hover{opacity:1;color:var(--cyan);box-shadow:0 0 12px rgba(95,216,255,.3);}
+
+/* more room on a real screen: bigger reactor, wider side columns, more padding */
+body.fullscreen .hud{padding:0 40px 30px;}
+body.fullscreen .masthead{padding:20px 40px 14px;}
+body.fullscreen .stage{gap:38px;padding:26px 40px;grid-template-columns:minmax(200px,280px) 1fr minmax(280px,400px);}
+body.fullscreen .orb-wrap{width:min(52vh,460px);}
+body.fullscreen .command{margin:0 40px;padding:15px 22px;}
+body.fullscreen .wordmark{font-size:clamp(1.3rem,2.4vw,1.8rem);}
 
 /* ─────────── shell ─────────── */
 .hud{
-  position:relative;height:100vh;
+  position:relative;flex:1;min-height:0;
   display:flex;flex-direction:column;
   padding:0 24px 20px;isolation:isolate;
   background:
@@ -76,8 +101,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 }
 
 .bracket{position:absolute;width:42px;height:42px;border-color:var(--cyan-mid);opacity:.8;pointer-events:none;}
-.bracket.tl{top:40px;left:10px;border-top:1px solid;border-left:1px solid;}
-.bracket.tr{top:40px;right:10px;border-top:1px solid;border-right:1px solid;}
+.bracket.tl{top:8px;left:10px;border-top:1px solid;border-left:1px solid;}
+.bracket.tr{top:8px;right:10px;border-top:1px solid;border-right:1px solid;}
 .bracket.bl{bottom:10px;left:10px;border-bottom:1px solid;border-left:1px solid;}
 .bracket.br{bottom:10px;right:10px;border-bottom:1px solid;border-right:1px solid;}
 .bracket::after{content:'';position:absolute;width:5px;height:5px;background:var(--cyan);box-shadow:0 0 6px var(--cyan);}
@@ -156,7 +181,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   display:grid;place-items:center;
   --rx:#8fe9ff;--rx-hot:#f2ffff;--rx-glow:rgba(95,216,255,.30);
 }
-.reticle{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.reticle{position:absolute;inset:0;width:100%;height:100%;}
+.orb-col{overflow:hidden;}
 .reticle .spin-a{transform-origin:50% 50%;animation:spin 48s linear infinite;}
 .reticle .spin-b{transform-origin:50% 50%;animation:spin 26s linear infinite reverse;}
 .reticle .spin-c{transform-origin:50% 50%;animation:spin 90s linear infinite;}
@@ -267,6 +293,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
   padding:9px 11px;font-size:.85rem;outline:none;
 }
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan-mid);}
+/* Windows renders <option> with the system palette — force it dark or the
+   provider list is white-on-white and unreadable */
+.field select option{background:#061219;color:var(--text);}
 .field textarea{resize:vertical;min-height:84px;line-height:1.5;}
 .field small{display:block;margin-top:5px;font-size:.68rem;color:var(--dim);}
 

@@ -1,7 +1,7 @@
 {
   "name": "jarvis",
   "productName": "Jarvis",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Jarvis — a desktop AI assistant with an arc reactor HUD.",
   "main": "main.js",
   "author": "Kris",

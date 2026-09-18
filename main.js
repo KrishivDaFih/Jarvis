@@ -74,6 +74,23 @@ function createWindow() {
   win.once('ready-to-show', () => win.show());
   win.on('closed', () => { win = null; });
 
+  // let the renderer hide the titlebar and swap the button icon
+  win.on('enter-full-screen', () => win && win.webContents.send('window:fullscreen', true));
+  win.on('leave-full-screen', () => win && win.webContents.send('window:fullscreen', false));
+  win.on('maximize',   () => win && win.webContents.send('window:maximized', true));
+  win.on('unmaximize', () => win && win.webContents.send('window:maximized', false));
+
+  // F11 toggles fullscreen here so it fires even when focus is inside the
+  // command input. Escape is left to the renderer, which needs it for the
+  // settings sheet and only exits fullscreen when no sheet is open.
+  win.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return;
+    if (input.key === 'F11') {
+      win.setFullScreen(!win.isFullScreen());
+      event.preventDefault();
+    }
+  });
+
   // open external links in the real browser, not inside the app
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
@@ -119,6 +136,18 @@ app.on('will-quit', () => globalShortcut.unregisterAll());
    ──────────────────────────────────────────────── */
 ipcMain.on('window:minimize', () => win && win.minimize());
 ipcMain.on('window:close', () => win && win.close());
+ipcMain.on('window:toggle-maximize', () => {
+  if (!win) return;
+  if (win.isMaximized()) win.unmaximize(); else win.maximize();
+});
+ipcMain.on('window:toggle-fullscreen', () => {
+  if (!win) return;
+  win.setFullScreen(!win.isFullScreen());
+});
+ipcMain.on('window:exit-fullscreen', () => {
+  if (win && win.isFullScreen()) win.setFullScreen(false);
+});
+ipcMain.handle('window:is-fullscreen', () => (win ? win.isFullScreen() : false));
 
 /* ────────────────────────────────────────────────
    IPC — settings
@@ -143,6 +172,12 @@ ipcMain.handle('chat:send', async (_evt, history) => {
 
   if (!key) {
     return { ok: false, error: 'No API key set for ' + s.provider + '. Open settings and add one.' };
+  }
+
+  // an empty Model field used to reach the API as "model": "" and come back
+  // as an opaque 400 — fall back to the default instead
+  if (!(s.models[s.provider] || '').trim()) {
+    s.models[s.provider] = DEFAULTS.models[s.provider];
   }
 
   try {
